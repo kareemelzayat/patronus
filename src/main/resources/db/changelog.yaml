@@ -1,0 +1,143 @@
+databaseChangeLog:
+  - changeSet:
+      id: "create service tables"
+      author: Kareem Elzayat
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: patronus_user
+            - tableExists:
+                tableName: device
+      changes:
+        - createTable:
+            tableName: patronus_user
+            columns:
+              - column:
+                  name: id
+                  type: bigint(20)
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: version
+                  type: int
+                  defaultValueNumeric: "0"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_created
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_updated
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: address
+                  type: longtext
+                  constraints:
+                    nullable: false
+              - column:
+                  name: birthday
+                  type: date
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(30)
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: device
+            columns:
+              - column:
+                  name: uuid
+                  type: varchar(36)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: version
+                  type: int
+                  defaultValueNumeric: "0"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_created
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_updated
+                  type: timestamp
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: serial_number
+                  type: varchar(16)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone
+                  type: varchar(15)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: model
+                  type: varchar(15)
+                  constraints:
+                    nullable: false
+        - createTable:
+           tableName: patronus_user_devices
+           columns:
+              - column:
+                  name: patronus_user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: device_uuid
+                  type: varchar(36)
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: device
+            columnNames: serial_number, model
+        - addForeignKeyConstraint:
+            baseColumnNames: patronus_user_id
+            baseTableName: patronus_user_devices
+            constraintName: fk_patronus_user
+            referencedColumnNames: id
+            referencedTableName: patronus_user
+        - addForeignKeyConstraint:
+            baseColumnNames: device_uuid
+            baseTableName: patronus_user_devices
+            constraintName: fk_device
+            referencedColumnNames: uuid
+            referencedTableName: device
