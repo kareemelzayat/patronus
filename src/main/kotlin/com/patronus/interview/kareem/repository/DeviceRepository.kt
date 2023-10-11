@@ -14,4 +14,6 @@ import java.util.UUID
 @Repository
 interface DeviceRepository : CrudRepository<Device, UUID>, PagingAndSortingRepository<Device, UUID> {
     fun findAllByUser(user: User, pageable: Pageable): Page<Device>
+
+    fun findByUuidAndUser(uuid: UUID, user: User): Device?
 }

@@ -30,31 +30,29 @@ class DeviceController(
 
     @PostMapping
     @RequiresAdmin
-    fun create(
-        @RequestHeader("X-User-ID") userId: Long,
-        @RequestBody deviceDto: DeviceDto
-    ) : DeviceDto {
-        return deviceService.create(deviceDto, User()).toDto()
+    fun create(@RequestHeader("X-User-ID") principalId: Long, @RequestBody deviceDto: DeviceDto) : ResponseEntity<DeviceDto> {
+        return ResponseEntity(deviceService.create(deviceDto, User()).toDto(), HttpStatus.CREATED)
+    }
+
+    @GetMapping("/{uuid}")
+    fun get(@RequestHeader("X-User-ID") principalId: Long, @PathVariable uuid: UUID): ResponseEntity<DeviceDto> {
+        val user: User = userService.getById(principalId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        val device: Device = deviceService.getByUser(uuid, user) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        return ResponseEntity(device.toDto(), HttpStatus.OK)
     }
 
     @PutMapping("/{uuid}")
     @RequiresAdmin
-    fun update(
-        @PathVariable uuid: UUID,
-        @RequestHeader("X-User-ID") principalId: Long,
-        @RequestBody assignUserDto: AssignUserDto
-    ): ResponseEntity<DeviceDto> {
+    fun update(@RequestHeader("X-User-ID") principalId: Long, @PathVariable uuid: UUID, @RequestBody assignUserDto: AssignUserDto): ResponseEntity<DeviceDto> {
+        val adminUser: User = userService.getById(principalId)!!
         val user: User = userService.getById(assignUserDto.userId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
-        val device: Device = deviceService.get(uuid) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+        val device: Device = deviceService.getByUser(uuid, adminUser) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
         return ResponseEntity(deviceService.assignToUser(device, user).toDto(), HttpStatus.OK)
     }
 
     @GetMapping
-    fun list(
-        @RequestHeader("X-User-ID") userId: Long,
-        pageable: Pageable
-    ): ResponseEntity<Page<DeviceDto>> {
-        val user: User = userService.getById(userId) ?: return ResponseEntity(HttpStatus.BAD_REQUEST)
+    fun list(@RequestHeader("X-User-ID") principalId: Long, pageable: Pageable): ResponseEntity<Page<DeviceDto>> {
+        val user: User = userService.getById(principalId) ?: return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (!user.isAdmin()) {
             return ResponseEntity(deviceService.listByUser(user, pageable).map { it.toDto() }, HttpStatus.OK)

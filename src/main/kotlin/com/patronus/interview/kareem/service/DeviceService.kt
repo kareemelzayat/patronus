@@ -6,6 +6,7 @@ import com.patronus.interview.kareem.modal.DeviceDto
 import com.patronus.interview.kareem.repository.DeviceRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -19,8 +20,8 @@ class DeviceService(
         return deviceRepository.save(newDevice)
     }
 
-    fun get(deviceUUID: UUID): Device? {
-        return deviceRepository.findById(deviceUUID).get()
+    fun getByUser(uuid: UUID, user: User): Device? {
+        return if (user.isAdmin()) deviceRepository.findByIdOrNull(uuid) else deviceRepository.findByUuidAndUser(uuid, user)
     }
 
     fun assignToUser(device: Device, user: User): Device {

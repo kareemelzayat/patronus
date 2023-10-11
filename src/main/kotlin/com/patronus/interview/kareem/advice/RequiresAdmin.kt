@@ -8,7 +8,7 @@ import org.aspectj.lang.annotation.Before
 import org.springframework.stereotype.Component
 import java.nio.file.attribute.UserPrincipalNotFoundException
 
-@Target(AnnotationTarget.FUNCTION)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class RequiresAdmin()
 

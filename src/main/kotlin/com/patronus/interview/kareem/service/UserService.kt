@@ -33,8 +33,8 @@ class UserService(
         return userRepository.findByIdOrNull(userId)
     }
 
-    fun list(pageable: Pageable?): Page<User> {
-        return if (pageable == null) userRepository.findAll(Pageable.unpaged()) else userRepository.findAll(pageable)
+    fun list(pageable: Pageable): Page<User> {
+        return userRepository.findAll(pageable)
     }
 
     /**
